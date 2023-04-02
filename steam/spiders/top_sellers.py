@@ -7,8 +7,10 @@ import json
 import re
 import pymongo
 from pymongo import MongoClient
+from datetime import date
 
 class TopSellersSpider(CrawlSpider):
+
     name = "top_sellers"
     allowed_domains = ["store.steampowered.com"]
 
@@ -29,7 +31,6 @@ class TopSellersSpider(CrawlSpider):
         return request
 
     def parse_item(self, response):
-        tags = []
         yield {
             'Title': response.xpath("//div[@id='appHubAppName_responsive']/text()").get(),
             'Text_Rating': response.xpath("//span[contains(@class, 'game_review_summary')][1]/text()").get(),
@@ -66,6 +67,8 @@ def clean_data(file_name):
             if type(row[key]) == list:
                 for i in range(0, len(row[key])):
                     row[key][i] = re.sub(r"[\n\t\r]*", "", row[key][i])
+        date_scraped = str(date.today())
+        row['date_scraped'] = date_scraped
         collection.insert_one(row)
 
 
